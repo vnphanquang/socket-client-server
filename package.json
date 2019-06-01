@@ -1,5 +1,5 @@
 {
-  "name": "client-upload",
+  "name": "spa-starter",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -21,11 +21,10 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "@babel/preset-es2016": "^7.0.0-beta.53",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-2": "^6.24.1",
-    "@babel/runtime": "^7.0.0",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/node": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
     "concurrently": "^4.0.1",
     "nodemon": "^1.18.4"
   }
