@@ -1,24 +1,23 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import { Switch, Route, Router } from 'react-router-dom'
 import './App.css';
 
-class App extends Component {
+import Login from './Login';
+import Home from './Home';
 
-  constructor(props) {
-    super(props);
-  }
+import history  from './history';
 
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        HIIH
-      </div>
-    );
-  }
-}
+const App = () => (
+  <Router history={history}>
+    <Switch>
+      <Route exact path="/">
+        <Login />
+      </Route>
+      <Route path="/home">
+        <Home />
+      </Route>
+    </Switch>
+  </Router>
+)
 
 export default App;
