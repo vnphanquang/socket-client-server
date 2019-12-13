@@ -7,7 +7,7 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiZmZlYTA1ZjctMzlhYi00NGIyLWI4ZWItZDM1NmNhMzljMjM0IiwiZW1haWwiOm51bGwsImZ1bGxOYW1lIjoiVGhvbnNvbS1lbnYgaG91c2UiLCJiaXJ0aGRheSI6IjE5OTktMTItMzFUMTc6MDA6MDAuMDAwWiIsImdlbmRlcklkIjoxMzAyLCJwaG9uZSI6bnVsbCwic29jaWFsSWQiOiJhYmMxMjM0IiwibWV0aG9kIjoiYXBwbGUiLCJtZXRhZGF0YSI6eyJwZW5kaW5nU3RlcCI6IlBST0ZJTEVfSU1BR0UifX0sImRldmljZUlkIjoiZDEiLCJpYXQiOjE1NzYxMzQyNDEsImV4cCI6MTU3NjIyMDY0MX0.17m6AEKxTvKrOdXJjdLhjuyTWRzwSOGSAmNLC_BXpsU',
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiOGUyMjVlZTAtMzlmMy00MTMwLWEzYzktOGFhMWM5NTRhMGI1IiwiZW1haWwiOm51bGwsImZ1bGxOYW1lIjoiVGhvbnNvbS1lbnYgaG91c2UiLCJiaXJ0aGRheSI6IjE5OTktMTItMzFUMTc6MDA6MDAuMDAwWiIsImdlbmRlcklkIjoxMzA1LCJwaG9uZSI6bnVsbCwic29jaWFsSWQiOiJhYmMxMjM0NTY3ODMyIiwibWV0aG9kIjoiYXBwbGUiLCJtZXRhZGF0YSI6eyJwZW5kaW5nU3RlcCI6IlBST0ZJTEVfSU1BR0UifX0sImRldmljZUlkIjoiZDEiLCJpYXQiOjE1NzYyMDc2MDIsImV4cCI6MTU3NjI5NDAwMn0.W3e_iNoHNWzQmGj4JNa4L1SMxbheud_Qu-bEuu1WidI',
       deviceId: 'd1',
     }
   }
@@ -32,7 +32,6 @@ class Login extends Component {
 
   onSubmit = (e) => {
     const { token, deviceId } = this.state;
-    console.log(this.props.history);
     this.props.history.push('/home', { token, deviceId });
   };
 

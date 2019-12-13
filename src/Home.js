@@ -65,6 +65,7 @@ class Home extends Component {
 
     socket.on('disconnect', (reason) => {
       console.log(`Disconnected: ${reason}`);
+      this.props.history.push('/');
     });
 
     socket.on('loggedIn', (userId) => {
@@ -84,7 +85,7 @@ class Home extends Component {
 
     });
 
-     socket.on('loggedOut', (userId) => {
+    socket.on('loggedOut', (userId) => {
         console.log(userId + ' logged out');
 
         const userStatus = this.state.users.map(u => {
@@ -113,8 +114,6 @@ class Home extends Component {
         }
         return temp;
       });
-
-      console.log('synced users: ', userStatus);
 
       this.setState({
         users: userStatus
