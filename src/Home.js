@@ -19,13 +19,7 @@ const options = {
   rejectUnauthorized: false,
   ws: true,
 }
-const socket = ioClient.connect(baseUrl, options);
-socket.on('connect', () => {
-  console.log('connected');
-  socket.emit('authentication', {
-    token: '5f59:7817:ec37:076d:1e8d:5522:827f:89e2',
-  });
-});
+let socket;
 
 class Home extends Component {
 
@@ -37,18 +31,31 @@ class Home extends Component {
     }
   }
 
-  // componentWillMount() {
-  //   this.refresh();
-  // }
-
   componentDidMount() {
-    const { token } = this.props.location.state;
+    const { token, deviceId } = this.props.location.state;
 
     if (token) {
-      console.log('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       this.refresh();
+
     }
+
+    socket = ioClient(baseUrl, options);
+
+    socket.connect();
+
+    window.onbeforeunload = function() {
+      console.log('test disconnect')
+      socket.disconnect();
+    }.bind(this);
+
+    socket.on('connect', (pong) => {
+      socket.emit('authentication', { token, deviceId});
+    });
+
+    socket.on('authenticated', (reason) => {
+
+    });
 
     socket.on('unauthorized', (reason) => {
       console.log('Unauthorized:', reason);
@@ -60,40 +67,77 @@ class Home extends Component {
       console.log(`Disconnected: ${reason}`);
     });
 
-    socket.on('ping', (ping) => {
-      console.log(`Sever receive ping: ${ping}`);
+    socket.on('loggedIn', (userId) => {
+      console.log(userId + ' logged in');
+
+      const userStatus = this.state.users.map(u => {
+        if (u.id === userId) {
+          return {...u, status: 'online'};
+        }
+
+        return u;
+      });
+
+      this.setState({
+        users: userStatus
+      });
+
     });
 
-    socket.on('pong', (pong) => {
-      console.log(`Sever respond pong: ${pong}`);
+     socket.on('loggedOut', (userId) => {
+        console.log(userId + ' logged out');
+
+        const userStatus = this.state.users.map(u => {
+          if (u.id === userId) {
+            return {...u, status: 'offline'};
+          }
+
+          return u;
+        });
+
+        this.setState({
+          users: userStatus
+        });
+      });
+
+    socket.on('syncedUsers', (users) => {
+      const userStatus = this.state.users.map(u => {
+        let temp;
+        for (let i = 0; i < users.length; i++) {
+          if (u.id === users[i].id) {
+            temp = {...u, status: users[i].status};
+            break;
+          }
+
+          temp = {...u, status: "offline"};
+        }
+        return temp;
+      });
+
+      console.log('synced users: ', userStatus);
+
+      this.setState({
+        users: userStatus
+      });
     });
 
-    // socket.on('someoneLogined', (payload) => {
-    //   console.log(`${payload} logined.`);
-    //   this.refresh();
-    // });
-
-    // socket.on('someoneLogouted', (payload) => {
-    //   console.log(`${payload} logouted.`);
-    //   this.refresh();
-    // });
-
-    // socket.on('connect_error', (err) => {
-    //   console.log('error', err);
-    // });
-
-    // socket.on('connect_timeout', (time) => {
-    //   console.log('timeout', time);
-    // });
   }
 
   refresh = () => {
     Axios.get(`${baseUrl}` + `/users/daily-suggestions`)
       .then((res) => {
+
+        const userStatus = res.data.map(u => ({...u, status: 'offline'}));
+
         this.setState({
-          users: res.data
+          users: userStatus
         });
-        // socket.emit('sync', users)
+
+
+        const userArr = res.data.map((u) => u.id);
+        socket.emit('joinRooms', userArr);
+        socket.emit('syncStatus', userArr);
+
       })
       .catch((error) => console.log(error));
   }
@@ -103,7 +147,9 @@ class Home extends Component {
       <thead>
         <tr>
           <th>id</th>
-          <th>name</th>
+          <th>fullName</th>
+          <th>email</th>
+          <th>gender</th>
           <th>status</th>
           <th>action</th>
         </tr>
@@ -113,10 +159,9 @@ class Home extends Component {
           users.map(u => (<tr key={u.id}>
             <td>{u.id}</td>
             <td>{u.fullName}</td>
+            <td>{u.email}</td>
+            <td>{u.gender}</td>
             <td style={{ color: `${u.status == 'online' ? 'green' : 'red'}`, fontWeight: 'bold' }}>{u.status}</td>
-            {
-              // u.id == userId ? <td style={{ cursor: 'pointer' }} onClick={(e) => this.logout(u.id)}> Logout me from this fucking app!!!</td> : null
-            }
           </tr>)
           )
         }
@@ -125,16 +170,13 @@ class Home extends Component {
   </div>);
 
   login = () => {
-    // socket.emit('login', { id: userId });
-  }
-
-  logout = (userId) => {
-    socket.disconnect();
-  }
+    socket.connect();
+  };
 
   disconnect = () => {
     socket.disconnect();
-  }
+    this.props.history.push('/');
+  };
 
   render() {
     const { users } = this.state;
@@ -144,7 +186,7 @@ class Home extends Component {
         <div>
           <h1>User list</h1>
           <button onClick={this.login}>Log me in</button>
-          <button onClick={this.disconnect}>Disconnect me</button>
+          <button onClick={this.disconnect}>Logout</button>
           {
             users.length && this.renderUser(users)
           }
@@ -154,4 +196,4 @@ class Home extends Component {
   }
 }
 
-export default withRouter(Home);;
+export default withRouter(Home);
