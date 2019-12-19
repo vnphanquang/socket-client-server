@@ -18,6 +18,8 @@ const options = {
   secure: true,
   rejectUnauthorized: false,
   ws: true,
+  requestTimeout: 4000,
+  autoConnect: true
 }
 let socket;
 
@@ -44,17 +46,20 @@ class Home extends Component {
 
     socket.connect();
 
-    window.onbeforeunload = function() {
+    window.onbeforeunload = function () {
       console.log('test disconnect')
       socket.disconnect();
     }.bind(this);
 
     socket.on('connect', (pong) => {
-      socket.emit('authentication', { token, deviceId});
+      console.log('connected');
+      socket.emit('authentication', { token, deviceId });
     });
 
     socket.on('authenticated', (reason) => {
-
+      const { users } = this.state;
+      this.syncUser(users);
+      console.log('authenticated and synced users');
     });
 
     socket.on('unauthorized', (reason) => {
@@ -65,7 +70,7 @@ class Home extends Component {
 
     socket.on('disconnect', (reason) => {
       console.log(`Disconnected: ${reason}`);
-      this.props.history.push('/');
+      // this.props.history.push('/');
     });
 
     socket.on('loggedIn', (userId) => {
@@ -73,7 +78,7 @@ class Home extends Component {
 
       const userStatus = this.state.users.map(u => {
         if (u.id === userId) {
-          return {...u, status: 'online'};
+          return { ...u, status: 'online' };
         }
 
         return u;
@@ -86,31 +91,31 @@ class Home extends Component {
     });
 
     socket.on('loggedOut', (userId) => {
-        console.log(userId + ' logged out');
+      console.log(userId + ' logged out');
 
-        const userStatus = this.state.users.map(u => {
-          if (u.id === userId) {
-            return {...u, status: 'offline'};
-          }
+      const userStatus = this.state.users.map(u => {
+        if (u.id === userId) {
+          return { ...u, status: 'offline' };
+        }
 
-          return u;
-        });
-
-        this.setState({
-          users: userStatus
-        });
+        return u;
       });
+
+      this.setState({
+        users: userStatus
+      });
+    });
 
     socket.on('syncedUsers', (users) => {
       const userStatus = this.state.users.map(u => {
         let temp;
         for (let i = 0; i < users.length; i++) {
           if (u.id === users[i].id) {
-            temp = {...u, status: users[i].status};
+            temp = { ...u, status: users[i].status };
             break;
           }
 
-          temp = {...u, status: "offline"};
+          temp = { ...u, status: "offline" };
         }
         return temp;
       });
@@ -122,21 +127,23 @@ class Home extends Component {
 
   }
 
+  syncUser = (users) => {
+    const userArr = users.map((u) => u.id);
+    socket.emit('joinRooms', userArr);
+    socket.emit('syncStatus', userArr);
+  }
+
   refresh = () => {
     Axios.get(`${baseUrl}` + `/users/daily-suggestions`)
       .then((res) => {
 
-        const userStatus = res.data.map(u => ({...u, status: 'offline'}));
+        const userStatus = res.data.map(u => ({ ...u, status: 'offline' }));
 
         this.setState({
           users: userStatus
         });
 
-
-        const userArr = res.data.map((u) => u.id);
-        socket.emit('joinRooms', userArr);
-        socket.emit('syncStatus', userArr);
-
+        this.syncUser(res.data);
       })
       .catch((error) => console.log(error));
   }
