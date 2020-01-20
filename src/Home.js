@@ -4,7 +4,11 @@ import { withRouter } from 'react-router-dom'
 import Axios from 'axios';
 import ioClient from 'socket.io-client';
 
-const baseUrl = 'http://localhost:4000';
+// const baseUrl = 'https://api-staging.beopen.app/v1';
+// const socketUrl = 'https://api-staging.beopen.app';
+const baseUrl = 'http://localhost:4000/v1';
+const socketUrl = 'http://localhost:4000';
+
 const axios = Axios.create();
 axios.defaults.baseURL = baseUrl;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -42,7 +46,7 @@ class Home extends Component {
 
     }
 
-    socket = ioClient(baseUrl, options);
+    socket = ioClient(socketUrl, options);
 
     socket.connect();
 
@@ -56,10 +60,11 @@ class Home extends Component {
       socket.emit('authentication', { token, deviceId });
     });
 
-    socket.on('authenticated', (reason) => {
+    socket.on('authenticated', (user) => {
       const { users } = this.state;
       this.syncUser(users);
-      console.log('authenticated and synced users');
+      socket.emit('joinOnlineRoom');
+      console.log('authenticated and synced users', user);
     });
 
     socket.on('unauthorized', (reason) => {
@@ -71,6 +76,10 @@ class Home extends Component {
     socket.on('disconnect', (reason) => {
       console.log(`Disconnected: ${reason}`);
       // this.props.history.push('/');
+    });
+
+    socket.on('matched', (data) => {
+      console.log(`It's matched: ${data}`);
     });
 
     socket.on('loggedIn', (userId) => {
@@ -106,6 +115,14 @@ class Home extends Component {
       });
     });
 
+    socket.on('offline', (userId) => {
+      console.log(userId + ' OFFLINE');
+    });
+
+    socket.on('matched', (data) => {
+      console.log('matched', data);
+    });
+
     socket.on('syncedUsers', (users) => {
       const userStatus = this.state.users.map(u => {
         let temp;
@@ -137,6 +154,7 @@ class Home extends Component {
     Axios.get(`${baseUrl}` + `/users/daily-suggestions`)
       .then((res) => {
 
+        console.log(res.data);
         const userStatus = res.data.map(u => ({ ...u, status: 'offline' }));
 
         this.setState({
@@ -157,7 +175,8 @@ class Home extends Component {
           <th>email</th>
           <th>gender</th>
           <th>status</th>
-          <th>action</th>
+          <th>like</th>
+          <th>liked me</th>
         </tr>
       </thead>
       <tbody>
@@ -166,8 +185,10 @@ class Home extends Component {
             <td>{u.id}</td>
             <td>{u.fullName}</td>
             <td>{u.email}</td>
-            <td>{u.gender}</td>
+            <td>{u.gender.label}</td>
             <td style={{ color: `${u.status == 'online' ? 'green' : 'red'}`, fontWeight: 'bold' }}>{u.status}</td>
+            <td style={{ cursor: 'pointer', color: `${u.status == 'liked' ? 'pink' : 'gray'}`, fontWeight: 'bold' }}>liked him/her</td>
+            <td style={{ color: `${u.status == 'likedme' ? 'pink' : 'gray'}`, fontWeight: 'bold' }}>liked me</td>
           </tr>)
           )
         }
@@ -184,6 +205,11 @@ class Home extends Component {
     this.props.history.push('/');
   };
 
+  leaveOnlineRoom = () => {
+    socket.emit('leaveOnlineRoom');
+    // this.props.history.push('/');
+  };
+
   render() {
     const { users } = this.state;
 
@@ -193,6 +219,7 @@ class Home extends Component {
           <h1>User list</h1>
           <button onClick={this.login}>Log me in</button>
           <button onClick={this.disconnect}>Logout</button>
+          <button onClick={this.leaveOnlineRoom}>Leave Online Room</button>
           {
             users.length && this.renderUser(users)
           }
