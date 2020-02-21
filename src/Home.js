@@ -82,25 +82,17 @@ class Home extends Component {
       console.log(`It's matched: ${data}`);
     });
 
-    socket.on('loggedIn', (userId) => {
-      console.log(userId + ' logged in');
-
-      const userStatus = this.state.users.map(u => {
-        if (u.id === userId) {
-          return { ...u, status: 'online' };
-        }
-
-        return u;
-      });
-
-      this.setState({
-        users: userStatus
-      });
-
+    socket.on('likedMe', (userId) => {
+      console.log(`${userId} liked me`);
     });
 
-    socket.on('loggedOut', (userId) => {
-      console.log(userId + ' logged out');
+    // socket.on('loggedIn', (userId) => {
+
+
+    // });
+
+    socket.on('offline', (userId) => {
+      console.log(userId + 'just offline');
 
       const userStatus = this.state.users.map(u => {
         if (u.id === userId) {
@@ -115,8 +107,20 @@ class Home extends Component {
       });
     });
 
-    socket.on('offline', (userId) => {
-      console.log(userId + ' OFFLINE');
+    socket.on('online', (userId) => {
+      console.log(userId + ' just online');
+
+      const userStatus = this.state.users.map(u => {
+        if (u.id === userId) {
+          return { ...u, status: 'online' };
+        }
+
+        return u;
+      });
+
+      this.setState({
+        users: userStatus
+      });
     });
 
     socket.on('matched', (data) => {
@@ -210,6 +214,11 @@ class Home extends Component {
     // this.props.history.push('/');
   };
 
+  joinOnlineRoom = () => {
+    socket.emit('joinOnlineRoom');
+    // this.props.history.push('/');
+  };
+
   render() {
     const { users } = this.state;
 
@@ -220,6 +229,7 @@ class Home extends Component {
           <button onClick={this.login}>Log me in</button>
           <button onClick={this.disconnect}>Logout</button>
           <button onClick={this.leaveOnlineRoom}>Leave Online Room</button>
+          <button onClick={this.joinOnlineRoom}>Join Online Room</button>
           {
             users.length && this.renderUser(users)
           }
