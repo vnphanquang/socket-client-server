@@ -4,10 +4,10 @@ import { withRouter } from 'react-router-dom'
 import Axios from 'axios';
 import ioClient from 'socket.io-client';
 
-// const baseUrl = 'https://api-staging.beopen.app/v1';
-// const socketUrl = 'https://api-staging.beopen.app';
-const baseUrl = 'http://localhost:4000/v1';
-const socketUrl = 'http://localhost:4000';
+const baseUrl = 'https://api-staging.beopen.app/v1';
+const socketUrl = 'https://api-staging.beopen.app';
+// const baseUrl = 'http://localhost:4000/v1';
+// const socketUrl = 'http://localhost:4000';
 
 const axios = Axios.create();
 axios.defaults.baseURL = baseUrl;
@@ -84,6 +84,10 @@ class Home extends Component {
 
     socket.on('likedMe', (userId) => {
       console.log(`${userId} liked me`);
+    });
+
+    socket.on('imageVerified', (user) => {
+      console.log(`${user} was verified.`);
     });
 
     // socket.on('loggedIn', (userId) => {
