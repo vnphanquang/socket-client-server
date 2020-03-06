@@ -7,10 +7,10 @@ fetch.Promise = Bluebird;
 const program = require('commander');
 program
   .option('--env <type>', 'production or development?', 'development')
-  .option('-l, --limit <type>', 'number of sockets to open', 10)
+  .option('--limit <type>', 'number of sockets to open', 10)
   .option('-H, --headless', 'headless mode?', true)
   .option('-r, --redirectLog', 'redirect logs?', false)
-  .option('-s, --screenshot <type>', 'screenshot export path');
+  .option('--screenshot <type>', 'screenshot export path');
 program.parse(process.argv);
 
 
