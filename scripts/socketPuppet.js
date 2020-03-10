@@ -8,7 +8,7 @@ const program = require('commander');
 program
   .option('--env <type>', 'production or development?', 'development')
   .option('--limit <type>', 'number of sockets to open', 10)
-  .option('-H, --headless', 'headless mode?', true)
+  .option('-H, --headless', 'headless mode?', false)
   .option('-r, --redirectLog', 'redirect logs?', false)
   .option('--screenshot <type>', 'screenshot export path');
 program.parse(process.argv);
