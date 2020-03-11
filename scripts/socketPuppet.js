@@ -14,6 +14,7 @@ program
   .option('--screenshot <type>', 'screenshot export path');
 program.parse(process.argv);
 
+const SOCKET_SERVER_URL = 'http://localhost:3000';
 
 const SERVER_CONFIG = {
   staging: {
@@ -88,7 +89,7 @@ async function fetchTokensFromAppleAuth(url, limit) {
       )
     }
 
-    await page.goto('http://localhost:3000');
+    await page.goto(SOCKET_SERVER_URL);
     await page.focus('#token');
     await page.keyboard.down('Shift');
     await page.keyboard.press('Home');
