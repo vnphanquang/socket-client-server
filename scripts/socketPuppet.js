@@ -6,16 +6,17 @@ fetch.Promise = Bluebird;
 // parsing cli arguments
 const program = require('commander');
 program
-  .option('--env <type>', 'production or development?', 'development')
+  .option('--env <type>', '[development, staging, production]', 'development')
   .option('--limit <type>', 'number of sockets to open', 10)
   .option('-H, --headless', 'headless mode?', false)
+  .option('-d, --delay', 'delay for ? seconds', null)
   .option('-r, --redirectLog', 'redirect logs?', false)
   .option('--screenshot <type>', 'screenshot export path');
 program.parse(process.argv);
 
 
 const SERVER_CONFIG = {
-  production: {
+  staging: {
     serverLocation: 'https://api-staging.beopen.app/v1/auth/apple',
     deviceUniqueId: 'dd96dec43fb81c97'
   },
@@ -30,6 +31,7 @@ const config = {
   headless: program.headless,
   redirectLog: program.redirectLog,
   screenshot: program.screenshot,
+  delay: program.delay,
   ...SERVER_CONFIG[program.env]
 }
 
@@ -117,6 +119,13 @@ async function fetchTokensFromAppleAuth(url, limit) {
   // on any data into stdin
   stdin.on( 'data', async function( key ) {
     if ( key === 'close\n' ) {
+      console.log('Closing pages...')
+      for (const page of pages) {
+        if (config.delay) {
+          await page.waitFor(config.delay * 1000);
+        }
+        await page.close();
+      }
       console.log('Closing browser...');
       await browser.close();
       process.exit();
