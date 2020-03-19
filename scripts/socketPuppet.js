@@ -32,7 +32,7 @@ const config = {
   headless: program.headless,
   redirectLog: program.redirectLog,
   screenshot: program.screenshot,
-  delay: program.delay,
+  delay: program.delay, 
   ...SERVER_CONFIG[program.env]
 }
 
