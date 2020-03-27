@@ -9,14 +9,19 @@ program
   .option('--env <type>', '[development, staging, production]', 'development')
   .option('--limit <type>', 'number of sockets to open', 10)
   .option('-H, --headless', 'headless mode?', false)
-  .option('-d, --delay', 'delay for ? seconds', null)
-  .option('-r, --redirectLog', 'redirect logs?', false)
+  .option('--anchor', 'apple ID suffix integer start (default 35)', 35)
+  .option('--delay', 'delay for ? seconds', null)
+  .option('--redirectLog', 'redirect logs?', false)
   .option('--screenshot <type>', 'screenshot export path');
 program.parse(process.argv);
 
 const SOCKET_SERVER_URL = 'http://localhost:3000';
 
 const SERVER_CONFIG = {
+  // production: {
+  //   serverLocation: 'http://localhost:4000/v1/auth/apple',
+  //   deviceUniqueId: 'd1'
+  // },
   staging: {
     serverLocation: 'https://api-staging.beopen.app/v1/auth/apple',
     deviceUniqueId: 'dd96dec43fb81c97'
@@ -30,6 +35,7 @@ const SERVER_CONFIG = {
 const config = {
   limit: program.limit,
   headless: program.headless,
+  anchor: program.anchor,
   redirectLog: program.redirectLog,
   screenshot: program.screenshot,
   delay: program.delay, 
@@ -39,7 +45,7 @@ const config = {
 // Fetching tokens (Apple login)
 async function fetchTokensFromAppleAuth(url, limit) {
   const appleIdPrefix = '13423214123124243';
-  const appleIdSuffixInt = 35;
+  const appleIdSuffixInt = config.anchor || 35;
   const deviceUniqueId = config.deviceUniqueId;
 
   const fetchedTokens = [];
