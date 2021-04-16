@@ -8,7 +8,7 @@ const program = require('commander');
 program
   .option('--env <type>', '[development, staging, production]', 'development')
   .option('--limit <type>', 'number of sockets to open', 10)
-  .option('--anchor <type>', 'apple ID suffix integer start (default 35)', 35)
+  .option('--anchor <type>', 'apple ID suffix integer start', 35)
   .option('--delay <type>', 'delay for ? seconds', null)
   .option('--redirectLog', 'redirect logs?', false)
   .option('--screenshot <type>', 'screenshot export path')
@@ -44,9 +44,8 @@ const config = {
 
 // Fetching tokens (Apple login)
 async function fetchTokensFromAppleAuth(url, limit) {
-  console.log(config.anchor)
   const appleIdPrefix = '13423214123124243';
-  const appleIdSuffixInt = config.anchor;
+  const appleIdSuffixInt = parseInt(config.anchor);
   const deviceUniqueId = config.deviceUniqueId;
 
   const fetchedTokens = [];
